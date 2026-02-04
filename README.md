@@ -291,18 +291,4 @@ results/experiment_YYYYMMDD_HHMMSS/
 | tqdm | ≥4.60 | Progress bars |
 | pyyaml | ≥5.4 | Configuration |
 
-## Citation
 
-If you use this codebase, please cite:
-
-```bibtex
-@software{forward_model_learning,
-  title={Forward-Model Guided Demonstration Learning},
-  year={2024},
-  url={https://github.com/...}
-}
-```
-
-## License
-
-[License information here]
