@@ -258,11 +258,41 @@ def run_single_experiment(config: Dict[str, Any],
         for condition in ['in_dist', 'shift_a', 'shift_b', 'shift_c']:
             if condition == 'in_dist':
                 summary, _ = evaluator.base_evaluator.evaluate_oracle(seed=seed, verbose=False)
-            else:
-                summary, _ = evaluator.base_evaluator.evaluate_on_shift(
-                    None, condition.replace('shift_', '').upper(),
-                    seed=seed, verbose=False
+            elif condition == 'shift_a':
+                # Same distribution, different seeds
+                summary, _ = evaluator.base_evaluator.evaluate_oracle(seed=seed + 50000, verbose=False)
+            elif condition == 'shift_b':
+                # More obstacles - create shifted evaluator
+                shifted_map = MapConfig(
+                    world_size=map_config.world_size,
+                    n_obstacles_range=(
+                        map_config.n_obstacles_range[1],
+                        map_config.n_obstacles_range[1] + 5
+                    ),
+                    obstacle_size_range=map_config.obstacle_size_range,
+                    start_goal_min_dist=map_config.start_goal_min_dist,
+                    start_goal_max_dist=map_config.start_goal_max_dist,
+                    margin=map_config.margin
                 )
+                shifted_eval = RolloutEvaluator(env_config, shifted_map, eval_config_obj)
+                summary, _ = shifted_eval.evaluate_oracle(seed=seed, verbose=False)
+            else:  # shift_c
+                # Dynamics shift - create shifted evaluator
+                shifted_env = EnvConfig(
+                    dt=env_config.dt * 1.5,
+                    v=env_config.v * 0.8,
+                    v_dynamics=env_config.v_dynamics,
+                    v_tau=env_config.v_tau,
+                    u_max=env_config.u_max,
+                    r_car=env_config.r_car,
+                    r_goal=env_config.r_goal,
+                    T_max=int(env_config.T_max * 1.5),
+                    w_dist=env_config.w_dist,
+                    w_ctrl=env_config.w_ctrl,
+                    collision_penalty=env_config.collision_penalty
+                )
+                shifted_eval = RolloutEvaluator(shifted_env, map_config, eval_config_obj)
+                summary, _ = shifted_eval.evaluate_oracle(seed=seed, verbose=False)
             oracle_results[condition] = summary
 
         method_results['oracle'] = oracle_results
