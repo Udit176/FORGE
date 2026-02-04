@@ -1,0 +1,52 @@
+# Cognitive Model Ablation Configurations
+# ========================================
+
+experiment:
+  name: "cognitive_ablations"
+  seed: 42
+  mode: "full"
+  n_seeds: 3
+  save_dir: "results/ablations/cognitive"
+
+# Ablation definitions
+ablations:
+  # A_Cog_1: Timing correction
+  delag:
+    name: "A_Cog_1_delag"
+    parameter: "cognitive.infer_tau"
+    values: [true, false]
+    description: "Effect of de-lag (timing) correction"
+
+  # A_Cog_2: Gain correction
+  gain:
+    name: "A_Cog_2_gain"
+    parameter: "cognitive.infer_g"
+    values: [true, false]
+    description: "Effect of gain correction"
+
+  # A_Cog_3: Deadzone modeling
+  deadzone:
+    name: "A_Cog_3_deadzone"
+    parameter: "cognitive.infer_delta"
+    values: [true, false]
+    description: "Effect of deadzone modeling"
+
+  # A_Cog_4: Noise estimation
+  noise:
+    name: "A_Cog_4_noise"
+    parameter: "cognitive.infer_sigma"
+    values: [true, false]
+    description: "Effect of noise estimation"
+
+  # A_Cog_5: Correction mode
+  mode:
+    name: "A_Cog_5_mode"
+    parameter: "cognitive.correction_mode"
+    values: ["full", "rescale_only", "delag_only"]
+    description: "Comparison of correction modes"
+
+# Run only cognitive model comparison
+methods:
+  - "oracle"
+  - "dagger_human"
+  - "dagger_cog"

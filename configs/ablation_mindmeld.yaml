@@ -1,0 +1,52 @@
+# MIND MELD Ablation Configurations
+# ==================================
+
+experiment:
+  name: "mindmeld_ablations"
+  seed: 42
+  mode: "full"
+  n_seeds: 3
+  save_dir: "results/ablations/mindmeld"
+
+# Ablation definitions
+ablations:
+  # A_MM_1: Personalization vs non-personalized
+  personalization:
+    name: "A_MM_1_personalization"
+    parameter: "mindmeld.personalized"
+    values: [true, false]
+    description: "Effect of personalized embeddings"
+
+  # A_MM_2: Sequence context window
+  context_window:
+    name: "A_MM_2_context"
+    parameter: "mindmeld.context_window"
+    values: [0, 3, 5, 10]
+    description: "Effect of sequence context window size"
+
+  # A_MM_3: State conditioning
+  state_features:
+    name: "A_MM_3_state"
+    parameter: "mindmeld.use_state_features"
+    values: [true, false]
+    description: "Effect of state conditioning"
+
+  # A_MM_4: Embedding dimension
+  embedding_dim:
+    name: "A_MM_4_embedding_dim"
+    parameter: "mindmeld.embedding_dim"
+    values: [2, 4, 8, 16]
+    description: "Effect of embedding dimensionality"
+
+  # A_MM_5: MI regularization
+  mi_weight:
+    name: "A_MM_5_mi"
+    parameter: "mindmeld.mi_weight"
+    values: [0.0, 0.01, 0.1, 0.5]
+    description: "Effect of MI regularization term"
+
+# Run only MIND MELD comparison
+methods:
+  - "oracle"
+  - "dagger_human"
+  - "dagger_mm"

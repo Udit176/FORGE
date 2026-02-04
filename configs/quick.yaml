@@ -1,0 +1,62 @@
+# Quick mode configuration for fast testing
+# Inherits from base.yaml with reduced settings
+# =============================================
+
+# Inherit from base (use base.yaml as starting point)
+
+experiment:
+  name: "quick_test"
+  seed: 42
+  mode: "quick"
+  n_seeds: 1
+  save_dir: "results/quick"
+
+# Reduced population
+population:
+  n_demonstrators: 5
+  tau_range: [-3.0, 3.0]
+  g_range: [0.7, 1.3]
+  sigma_range: [0.0, 0.1]
+  delta_range: [0.0, 0.05]
+  sat_range: [0.9, 1.0]
+  dropout_range: [0.0, 0.05]
+
+# Reduced dataset
+dataset:
+  k_calib: 2
+  k_train: 4
+  k_test_id: 2
+  k_test_shift_a: 2
+  k_test_shift_b: 2
+  k_test_shift_c: 2
+  use_cache: true
+
+# Faster policy training
+policy:
+  hidden_dims: [32, 32]
+  epochs: 10
+  early_stopping_patience: 3
+
+# Fewer DAgger iterations
+dagger:
+  n_iterations: 2
+  m_rollouts_per_iter: 3
+  k_init: 2
+
+# Faster MIND MELD
+mindmeld:
+  embedding_dim: 4
+  context_window: 3
+  lstm_hidden: 16
+  epochs: 20
+  early_stopping_patience: 5
+
+# Fewer eval episodes
+evaluation:
+  n_episodes: 5
+
+# Only essential methods
+methods:
+  - "oracle"
+  - "dagger_human"
+  - "dagger_cog"

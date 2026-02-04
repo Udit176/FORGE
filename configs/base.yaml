@@ -1,0 +1,176 @@
+# Base configuration for Forward-Model Guided Demonstration Learning
+# ===================================================================
+
+# Experiment settings
+experiment:
+  name: "base_experiment"
+  seed: 42
+  mode: "full"  # "quick" for fast testing, "full" for complete runs
+  n_seeds: 3    # Number of random seeds for statistical validity
+  save_dir: "results"
+
+# Environment settings
+environment:
+  dt: 0.1           # Time step (seconds)
+  v: 1.0            # Fixed velocity (m/s)
+  v_dynamics: false # Whether velocity has dynamics
+  v_tau: 0.5        # Velocity time constant (if v_dynamics=true)
+  u_max: 1.0        # Max steering rate (rad/s)
+  r_car: 0.2        # Car collision radius (m)
+  r_goal: 0.5       # Goal reaching radius (m)
+  T_max: 200        # Max episode length (steps)
+
+  # Cost weights
+  w_dist: 1.0
+  w_ctrl: 0.1
+  collision_penalty: 100.0
+
+# Map settings
+map:
+  world_size: [20.0, 20.0]        # World dimensions (m)
+  n_obstacles_range: [3, 8]       # Train obstacle count range
+  obstacle_size_range: [0.5, 2.0] # Obstacle size range (m)
+  start_goal_min_dist: 8.0        # Min start-goal distance
+  start_goal_max_dist: 15.0       # Max start-goal distance
+  margin: 1.0                     # Boundary margin
+
+# Dataset settings
+dataset:
+  # Episodes per demonstrator
+  k_calib: 8        # Calibration episodes
+  k_train: 16       # Training episodes (for DAgger init)
+  k_test_id: 8      # In-distribution test episodes
+  k_test_shift_a: 8 # Shift A test episodes
+  k_test_shift_b: 8 # Shift B test episodes
+  k_test_shift_c: 8 # Shift C test episodes
+
+  # Storage
+  store_trajectory: true
+  store_features: true
+  store_path_curvature: false
+  cache_dir: "data/cache"
+  use_cache: true
+
+# Demonstrator population settings
+population:
+  n_demonstrators: 50
+
+  # Cognitive parameter ranges
+  tau_range: [-5.0, 5.0]      # Timing offset (steps)
+  g_range: [0.6, 1.4]         # Gain multiplier
+  sigma_range: [0.0, 0.15]    # Motor noise std
+  delta_range: [0.0, 0.1]     # Deadzone threshold
+  sat_range: [0.8, 1.0]       # Saturation limit (fraction of u_max)
+  dropout_range: [0.0, 0.1]   # Attention dropout probability
+  tau_g_correlation: 0.0      # Correlation between tau and g
+
+# Policy settings
+policy:
+  input_dim: 12              # Feature dimension
+  hidden_dims: [64, 64]      # Hidden layer sizes
+  output_dim: 1              # Output dimension
+  activation: "relu"
+  dropout: 0.0
+  batch_norm: false
+
+  # Training
+  lr: 0.001
+  weight_decay: 0.0001
+  batch_size: 64
+  epochs: 30
+  early_stopping_patience: 5
+  val_fraction: 0.1
+
+# DAgger settings
+dagger:
+  n_iterations: 5
+  m_rollouts_per_iter: 10
+  k_init: 4                   # Initial BC episodes
+  beta_schedule: "linear_decay"
+  beta_init: 1.0
+  beta_final: 0.0
+  aggregate_mode: "all"
+  warm_start: true
+  retrain_from_scratch: false
+
+# MIND MELD settings
+mindmeld:
+  embedding_dim: 8
+  context_window: 5           # L (uses 2L+1 total)
+  lstm_hidden: 32
+  use_bidirectional: true
+  use_state_features: true
+  mode: "learned_embedding"   # "learned_embedding" or "variational_mi"
+  mi_weight: 0.1
+  encoder_hidden: 32
+
+  # Training
+  lr: 0.001
+  weight_decay: 0.0001
+  batch_size: 64
+  epochs: 50
+  early_stopping_patience: 10
+
+# Cognitive model settings
+cognitive:
+  infer_tau: true
+  infer_g: true
+  infer_delta: true
+  infer_sigma: true
+
+  # Parameter bounds
+  tau_range: [-10.0, 10.0]
+  g_range: [0.3, 2.0]
+  delta_range: [0.0, 0.3]
+  sigma_range: [0.0, 0.5]
+
+  # Inference settings
+  max_lag_search: 15
+  use_dtw: false
+  robust_regression: true
+
+  # Correction settings
+  correction_mode: "full"     # "full", "rescale_only", "delag_only"
+  smooth_correction: true
+  smooth_window: 3
+
+# Evaluation settings
+evaluation:
+  n_episodes: 20
+  seed_offset: 10000
+  save_trajectories: true
+
+# Oracle controller settings
+oracle:
+  grid_resolution: 0.25
+  robot_radius: 0.3
+  heuristic_weight: 1.0
+  max_iterations: 10000
+  replan_interval: 10
+  lookahead_dist: 1.0
+  min_lookahead: 0.5
+  max_lookahead: 2.0
+  use_stanley: false
+
+# Methods to run
+methods:
+  - "oracle"        # C0: Oracle policy (upper bound)
+  - "dagger_human"  # C1: Simple DAgger with human labels
+  - "dagger_mm"     # C2: DAgger + MIND MELD correction
+  - "dagger_cog"    # C3: DAgger + Cognitive correction
+
+# Quick mode settings (override for fast testing)
+quick_mode:
+  n_seeds: 1
+  n_demonstrators: 5
+  k_calib: 2
+  k_train: 4
+  k_test_id: 2
+  k_test_shift_a: 2
+  k_test_shift_b: 2
+  k_test_shift_c: 2
+  dagger_n_iterations: 2
+  dagger_m_rollouts: 3
+  policy_epochs: 10
+  mindmeld_epochs: 20
+  eval_n_episodes: 5

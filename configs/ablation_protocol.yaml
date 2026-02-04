@@ -1,0 +1,57 @@
+# Protocol Ablation Configurations
+# =================================
+
+experiment:
+  name: "protocol_ablations"
+  seed: 42
+  mode: "full"
+  n_seeds: 3
+  save_dir: "results/ablations/protocol"
+
+# Ablation definitions
+ablations:
+  # A_P_1: Calibration data size
+  calibration_size:
+    name: "A_P_1_calib_size"
+    parameter: "dataset.k_calib"
+    values: [1, 2, 4, 8, 16]
+    description: "Effect of calibration data size"
+
+  # A_P_2: Teacher noise level
+  noise_level:
+    name: "A_P_2_noise"
+    parameter: "population.sigma_max"
+    values: [0.05, 0.1, 0.2, 0.3]
+    description: "Effect of teacher noise level"
+    # Note: sigma_max = sigma_range[1]
+
+  # A_P_3: Timing bias range
+  timing_bias:
+    name: "A_P_3_timing"
+    parameter: "population.tau_max"
+    values: [0, 2, 5, 10]
+    description: "Effect of timing bias range"
+    # Note: tau_max = tau_range[1]
+
+  # A_P_4: Dynamics shift severity
+  dynamics_shift:
+    name: "A_P_4_dynamics"
+    parameter: "shift_c_severity"
+    values: [0.0, 0.25, 0.5, 0.75]
+    description: "Effect of dynamics shift severity"
+    # Modifies dt multiplier: 1 + severity * 0.5
+    # Modifies v multiplier: 1 - severity * 0.2
+
+  # A_P_5: Data collection budget
+  data_budget:
+    name: "A_P_5_budget"
+    parameter: "dagger.m_rollouts_per_iter"
+    values: [5, 10, 20, 40]
+    description: "Effect of data collection budget per iteration"
+
+# Run all methods for comparison
+methods:
+  - "oracle"
+  - "dagger_human"
+  - "dagger_mm"
+  - "dagger_cog"
